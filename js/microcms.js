@@ -376,9 +376,9 @@
       '</a>';
   }
 
-  /* 施工実績が0件のときの「Coming Soon」プレースホルダー（3件） */
-  function worksComingSoon() {
-    var one = '<div class="work-card work-card--coming" aria-disabled="true">' +
+  /* 「Coming Soon」プレースホルダーのカード1枚分（既存デザインをそのまま流用） */
+  function worksComingSoonCard() {
+    return '<div class="work-card work-card--coming" aria-disabled="true">' +
         '<div class="work-card__image work-card__image--placeholder"><span class="work-card__coming">Coming Soon</span></div>' +
         '<div class="work-card__body">' +
           '<span class="work-card__category">施工実績</span>' +
@@ -386,7 +386,12 @@
           '<p class="work-card__date">掲載準備中</p>' +
         '</div>' +
       '</div>';
-    return one + one + one;
+  }
+  /* Coming Soon カードを n 枚ぶん連結して返す（n<=0 なら空文字） */
+  function worksComingSoonCards(n) {
+    var html = '';
+    for (var i = 0; i < n; i++) html += worksComingSoonCard();
+    return html;
   }
 
   /* 施工実績 一覧：microCMSから取得してカード表示＋カテゴリ絞り込み */
@@ -402,10 +407,22 @@
         im.addEventListener('error', function () { im.style.display = 'none'; });
       });
     }
+    var WORKS_MIN_SLOTS = 3; // 「すべて」表示の最小枠数（実績＋Coming Soonで必ず埋める）
     function apply() {
-      if (!all.length) { el.innerHTML = worksComingSoon(); return; } // 全体0件 → Coming Soon 3件
-      var list = (active === 'すべて') ? all : all.filter(function (it) { return categoryMatches(worksCategories(it), active); });
-      if (!list.length) { el.innerHTML = '<p class="works-empty">該当する施工実績はありません。</p>'; return; } // 全体はあるが該当カテゴリ0件
+      if (active === 'すべて') {
+        // 実際の施工実績（公開日/施工日の新しい順。all は publishedSorted 済み）を表示し、
+        // 3枠に満たない分だけ Coming Soon カードで右側を埋める。
+        //   0件→Coming×3 / 1件→実績1+Coming2 / 2件→実績2+Coming1 /
+        //   3件→実績3のみ / 4件以上→実績すべて（Coming無し）
+        var cards = all.map(function (it) { return worksCardHtml(it, hrefPrefix); }).join('');
+        cards += worksComingSoonCards(WORKS_MIN_SLOTS - all.length); // 差が0以下なら何も足さない
+        el.innerHTML = cards;
+        attachImgError();
+        return;
+      }
+      // カテゴリ選択時：Coming Soon は出さず、該当する実際の施工実績のみ表示。
+      var list = all.filter(function (it) { return categoryMatches(worksCategories(it), active); });
+      if (!list.length) { el.innerHTML = '<p class="works-empty">現在、このカテゴリーの施工実績はありません。</p>'; return; }
       el.innerHTML = list.map(function (it) { return worksCardHtml(it, hrefPrefix); }).join('');
       attachImgError();
     }
