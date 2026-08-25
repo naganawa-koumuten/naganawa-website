@@ -114,99 +114,33 @@
       </div>
 
       <!-- ============================================================
-           お問い合わせフォーム（通常運用中）
-           一時停止の案内は下の <template id="contact-suspend-notice"> 内に
-           コードとして保持しています（template の中身は表示されません）。
-           ▼ 再度すぐ一時停止に戻す手順：
-             1) config.php の $form_suspended = true;（サーバ側で送信受付を停止）
-             2) 下の <template id="contact-suspend-notice"> と </template> の
-                2行を外して案内ブロックを表示
-             3) 下の form-lead / form-legend / <form>〜</form> を <template> で
-                囲んで非表示にする
+           お問い合わせフォーム（Tayori 埋め込み）
+           ------------------------------------------------------------
+           旧HPで実際に使用していた Tayori フォームを移植（正のURL）。
+             https://tayori.com/form/c1701305e9a038310e9f49c89b76732440d2cf3f/
+           独自PHP送信（contact_mail.php / config.php）は CANONET で
+           mb_send_mail() が失敗するため廃止し、Tayori に一本化。
+           ※ PHP関連ファイルは残置（未使用）。詳細は docs/HANDOVER.md 参照。
            ============================================================ -->
-      <!-- [一時停止用の案内：コード保持のみ。<template>内は表示されません] -->
-      <template id="contact-suspend-notice">
-      <div class="form-notice" role="status" style="max-width:640px;margin:0 auto;background:#fff;border:1px solid #e3e8ee;border-left:5px solid var(--accent);border-radius:12px;padding:36px 28px;text-align:center;">
-        <p style="font-size:1.1rem;font-weight:700;color:var(--navy-dark);margin:0 0 14px;">
-          お問い合わせフォームは現在調整中です。
-        </p>
-        <p style="color:var(--text-sub);line-height:1.9;margin:0 0 24px;">
-          お急ぎの方は、下記までお電話ください。<br>
-          ご不便をおかけし、申し訳ございません。
-        </p>
-        <a href="tel:0568816099" class="btn btn-accent btn-lg" style="display:inline-block;">
-          TEL：0568-81-6099
-        </a>
-        <p style="color:var(--text-sub);font-size:0.85rem;margin:16px 0 0;">
-          （スマートフォンはタップで発信できます／受付：平日 8:00〜17:00）
-        </p>
-      </div>
-      </template>
-
-      <!-- 入力フォーム（通常運用中） -->
       <p class="form-lead">
-        下記フォームにご入力のうえ「確認画面へ進む」を押してください。<br>
+        下記フォームに必要事項をご入力のうえ、送信してください。<br>
         工事のご相談・お見積り・採用に関するご質問など、お気軽にお問い合わせください。
       </p>
-      <p class="form-legend"><span class="req">必須</span> は入力必須の項目です。</p>
 
-      <!-- 入力フォーム（送信すると確認画面へ / contact_mail.php phase=check） -->
-      <form class="contact-form" action="contact_mail.php" method="post" novalidate>
-        <input type="hidden" name="phase" value="check">
-        <!-- スパム対策（ハニーポット）：人間には見えない項目。botが入力すると破棄されます。 -->
-        <div class="hp-field" aria-hidden="true">
-          <label for="f-website">ウェブサイト（入力不要）</label>
-          <input type="text" id="f-website" name="website" tabindex="-1" autocomplete="off">
-        </div>
-
-        <div class="field">
-          <label for="f-name">お名前 <span class="req">必須</span></label>
-          <input type="text" id="f-name" name="name" required autocomplete="name" placeholder="長縄 太郎">
-        </div>
-
-        <div class="field">
-          <label for="f-kana">ふりがな <span class="req">必須</span></label>
-          <input type="text" id="f-kana" name="kana" required placeholder="ながなわ たろう">
-        </div>
-
-        <div class="field">
-          <label for="f-phone">電話番号 <span class="req">必須</span></label>
-          <input type="tel" id="f-phone" name="phone" required autocomplete="tel" placeholder="0568-81-6099">
-        </div>
-
-        <div class="field">
-          <label for="f-email">メールアドレス <span class="req">必須</span></label>
-          <input type="email" id="f-email" name="email" required autocomplete="email" placeholder="example@example.com">
-        </div>
-
-        <div class="field">
-          <label for="f-occupation">会社名・団体名 <span class="any">任意</span></label>
-          <input type="text" id="f-occupation" name="occupation" autocomplete="organization" placeholder="株式会社〇〇">
-        </div>
-
-        <div class="field">
-          <label for="f-education">お問い合わせ種別 <span class="any">任意</span></label>
-          <select id="f-education" name="education">
-            <option value="">選択してください</option>
-            <option value="工事のご相談・お見積り">工事のご相談・お見積り</option>
-            <option value="採用について">採用について</option>
-            <option value="協力会社・お取引について">協力会社・お取引について</option>
-            <option value="その他">その他</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label for="f-contents">お問い合わせ内容 <span class="req">必須</span></label>
-          <textarea id="f-contents" name="contents" required placeholder="お問い合わせ内容をご記入ください。"></textarea>
-        </div>
-
-        <div class="submit-row">
-          <button type="submit" class="btn btn-accent btn-lg">確認画面へ進む →</button>
-        </div>
-        <p class="privacy">
-          ご入力いただいた個人情報は、お問い合わせへの対応のみに使用いたします。
-        </p>
-      </form>
+      <!-- お問い合わせフォーム（Tayori） -->
+      <div class="tayori-form-wrap" style="max-width:760px;margin:0 auto;">
+        <iframe
+          src="https://tayori.com/form/c1701305e9a038310e9f49c89b76732440d2cf3f/"
+          title="お問い合わせフォーム"
+          loading="lazy"
+          style="width:100%;min-height:1150px;border:0;background:#fff;border-radius:var(--radius);"
+        ></iframe>
+      </div>
+      <p class="form-note" style="text-align:center;margin-top:16px;color:var(--text-sub);line-height:1.8;">
+        ※ フォームが表示されない場合は
+        <a href="https://tayori.com/form/c1701305e9a038310e9f49c89b76732440d2cf3f/" target="_blank" rel="noopener" style="color:var(--navy);text-decoration:underline;">こちらのお問い合わせフォーム</a>
+        から直接ご入力ください。
+      </p>
     </div>
   </section>
 
