@@ -66,6 +66,14 @@
     .form-lead { text-align: center; color: var(--text-sub, #6b7280); line-height: 1.9; margin-bottom: 12px; }
     .form-legend { text-align: center; font-size: 13px; color: var(--text-sub, #6b7280); margin-bottom: 30px; }
     .form-legend .req { background:#e11d48;color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px; }
+    /* Tayori iframe：レスポンシブ高さ。iframeは別オリジン(tayori.com)で内容高さを
+       取得できず自動リサイズ不可のため、PC/スマホで妥当な固定値を指定して余白を詰める。
+       内容が高さを超える画面（確認/送信完了/入力エラー等）では iframe 内スクロールで
+       表示され“切れ”を防止する（scrolling は既定の auto のまま。無効化しない）。 */
+    .tayori-form-wrap iframe { display: block; width: 100%; height: 980px; }
+    @media (max-width: 768px) {
+      .tayori-form-wrap iframe { height: 1450px; }
+    }
   </style>
 </head>
 <body>
@@ -133,7 +141,7 @@
           src="https://tayori.com/form/c1701305e9a038310e9f49c89b76732440d2cf3f/"
           title="お問い合わせフォーム"
           loading="lazy"
-                    style="width:100%;min-height:1150px;border:0;background:transparent;"
+          style="width:100%;border:0;background:transparent;"
         ></iframe>
       </div>
       <p class="form-note" style="text-align:center;margin-top:16px;color:var(--text-sub);line-height:1.8;">
