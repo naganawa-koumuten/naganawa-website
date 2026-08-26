@@ -70,9 +70,18 @@
        取得できず自動リサイズ不可のため、PC/スマホで妥当な固定値を指定して余白を詰める。
        内容が高さを超える画面（確認/送信完了/入力エラー等）では iframe 内スクロールで
        表示され“切れ”を防止する（scrolling は既定の auto のまま。無効化しない）。 */
-    .tayori-form-wrap iframe { display: block; width: 100%; height: 980px; }
-    @media (max-width: 768px) {
-      .tayori-form-wrap iframe { height: 1450px; }
+    .tayori-form-wrap { --tayori-crop: 180px; overflow: hidden; }
+    .tayori-form-wrap iframe {
+      display: block;
+      width: 100%;
+      height: 980px;                 /* PC：フォーム全体が収まる高さ */
+      border: 0;
+      background: transparent;
+      margin-top: calc(var(--tayori-crop) * -1);
+    }
+    @media (max-width: 600px) {
+      .tayori-form-wrap iframe { height: 1180px; }   /* スマホ：やや高め */
+    }
     }
   </style>
 </head>
