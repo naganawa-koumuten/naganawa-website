@@ -48,7 +48,12 @@
   <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Noto+Sans+JP:wght@300;400;500;700;900&family=Shippori+Mincho+B1:wght@400;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css?v=8">
   <!-- 施工実績・お知らせ 共通コンポーネント（BEM）。microCMS連携を見据えた枠組み -->
-  <link rel="stylesheet" href="assets/components.css?v=8">
+  <link rel="stylesheet" href="assets/components.css?v=8">  
+  <style>
+    /* TOPページ限定：新着情報(#news)・アクセス(#access)の背景を透過し、
+       ページ全体の背景ロゴ(body::before)を透けて見せる。背景色のみ変更。 */
+    #news, #access { background: transparent; }
+  </style>
 </head>
 <body>
 
