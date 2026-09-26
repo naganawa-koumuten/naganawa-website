@@ -1,0 +1,35 @@
+# ============================================================
+#  naganawa-k.co.jp  リダイレクト設定（旧サイト → 新サイトへ統合）
+#  ------------------------------------------------------------
+#  目的: Google検索や旧URLからのアクセスを現行の新サイトへ集約する。
+#  ・旧サイト固有ページ（新サイトに存在しない）→ 対応する新ページへ 301。
+#  ・サーバー上に旧 .html が実在しても、mod_rewrite は「ファイル配信前」に
+#    走るため 301 が優先される（＝崩れた旧ページを表示させない）。
+#  ・新サイトに同名で存在するページ（index/business/technology/works/news/
+#    recruit/about/contact）はどのルールにも一致しない＝リダイレクトしない
+#    （自己リダイレクト・ループ防止）。
+#  ※ Apache + mod_rewrite 前提。CANONETがApacheでない/AllowOverride無効なら効かない。
+# ============================================================
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # ---- 旧サイト固有ページ → 新サイト対応ページ（301・単一ホップ・完全一致）----
+  # 会社・募集概要 / ビジョン / ポリシー → 会社情報
+  RewriteRule ^company\.html$        https://naganawa-k.co.jp/about.html    [R=301,L]
+  RewriteRule ^vision\.html$         https://naganawa-k.co.jp/about.html    [R=301,L]
+  RewriteRule ^policy\.html$         https://naganawa-k.co.jp/about.html    [R=301,L]
+  # 仕事紹介 / 職種一覧 / 資格一覧 → 採用情報
+  RewriteRule ^professional\.html$   https://naganawa-k.co.jp/recruit.html  [R=301,L]
+  RewriteRule ^jobs\.html$           https://naganawa-k.co.jp/recruit.html  [R=301,L]
+  RewriteRule ^qualification\.html$  https://naganawa-k.co.jp/recruit.html  [R=301,L]
+
+  # ---- 正規化: HTTP → HTTPS（TLSオフロード環境も考慮）----
+  # ※ ループが出る場合はこの2ブロック(HTTPS/www)だけ一時無効化して切り分け。
+  RewriteCond %{HTTPS} off
+  RewriteCond %{HTTP:X-Forwarded-Proto} !https
+  RewriteRule ^ https://naganawa-k.co.jp%{REQUEST_URI} [R=301,L]
+
+  # ---- 正規化: www あり → 非www（正規ホストは naganawa-k.co.jp）----
+  RewriteCond %{HTTP_HOST} ^www\.naganawa-k\.co\.jp$ [NC]
+  RewriteRule ^ https://naganawa-k.co.jp%{REQUEST_URI} [R=301,L]
+</IfModule>
