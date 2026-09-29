@@ -348,6 +348,33 @@
   }
   function worksCatClass(cat) { return WORKS_CATEGORY_CLASS[normCat(cat)] || WORKS_CATEGORY_CLASS[cat] || 'other'; }
 
+  /* ── 施工実績の「公開中か」判定（works専用）────────────────
+   *  ※ works は completionDate / workDate 等「施工内容の日付」を持つため、
+   *    汎用の isPublished（PUBLISH_FIELDS を先頭から使用）だと、未来の
+   *    完成予定日などを公開日時と誤認して、公開中でも非表示になる。
+   *    そこで works の公開可否・並び替えは microCMS 標準の publishedAt
+   *    （無ければ createdAt）だけで判定する。表示用の日付（worksDate /
+   *    formatDateJST = 完成年月等）は従来どおりで変更しない。
+   * ------------------------------------------------------------ */
+  var WORKS_PUBLISH_FIELDS = ['publishedAt', 'createdAt'];
+  function worksPublishInstant(item) {
+    for (var i = 0; i < WORKS_PUBLISH_FIELDS.length; i++) {
+      var t = toInstant(item[WORKS_PUBLISH_FIELDS[i]]);
+      if (t !== null) return t;
+    }
+    return null;
+  }
+  function isWorksPublished(item) {
+    var t = worksPublishInstant(item);
+    if (t === null) return true; // publishedAt/createdAt が全く無い場合のみ従来どおり表示
+    return t <= Date.now();
+  }
+  function worksPublishedSorted(items) {
+    return (items || []).filter(isWorksPublished).sort(function (a, b) {
+      return (worksPublishInstant(b) || 0) - (worksPublishInstant(a) || 0);
+    });
+  }
+
   function fetchWorksList(limit) {
     // 公開中のみ返る（GET用APIキー）。orders は必ず存在する publishedAt を使用
     // （不明なフィールドを orders に渡すと microCMS が 400 を返すため）。
@@ -438,7 +465,7 @@
     fetchWorksList(100).then(function (items) {
       // 【一時的なデバッグ】カテゴリの実フィールドID・値・型を確認するため。確認後に削除します。
       try { console.log('[works] 件数:', items.length, '／カテゴリ:', items.slice(0, 8).map(function (it) { return { raw: firstDefined(it, WORKS_CAT_KEYS), norm: worksCategories(it) }; }), '／先頭データ:', items[0]); } catch (e) {}
-      all = publishedSorted(items); apply(); // 公開済みのみ・公開日時の新しい順
+      all = worksPublishedSorted(items); apply(); // 公開済み(publishedAt基準)のみ・新しい順
     }).catch(function (err) {
       console.error('[microCMS] works取得に失敗:', err);
       el.innerHTML = '<p class="works-empty">施工実績を読み込めませんでした。</p>';
@@ -458,8 +485,8 @@
     fetchWorksOne(id).then(function (item) {
       // 【一時的なデバッグ】実フィールドID確認用。確認後に削除します。
       try { console.log('[works detail] item:', item); } catch (e) {}
-      // 公開日時前は、URL直接アクセスでも表示しない（日本時間で判定）
-      if (!isPublished(item)) {
+      // 公開前は、URL直接アクセスでも表示しない（works は publishedAt 基準）
+      if (!isWorksPublished(item)) {
         el.innerHTML = '<p class="works-empty">この施工実績はまだ公開されていません。</p>';
         return;
       }
